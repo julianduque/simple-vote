@@ -7,6 +7,7 @@
     <button @click="send">Propose</button>
     <account></account>
     <web3></web3>
+    <transactions></transactions>
     <proposal
       v-for="(p, hash) in proposals"
       :key="hash"
@@ -38,7 +39,7 @@ module.exports = {
     }
   },
   mounted () {
-    this.$store.dispatch('watch')
+    this.$store.dispatch('start')
   }
 }
 </script>

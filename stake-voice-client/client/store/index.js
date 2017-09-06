@@ -16,6 +16,7 @@ async function load () {
       error: null,
       account: null,
       balance: null,
+      transactions: {},
       proposals: {},
       votes: {},
       totals: {}
@@ -29,6 +30,9 @@ async function load () {
       },
       updateBalance (state, balance) {
         state.balance = balance
+      },
+      updateTransaction (state, { tx, from, type, status }) {
+        Vue.set(state.transactions, tx, { from, type, status })
       },
       updateProposal (state, { proposal, proposalHash }) {
         Vue.set(state.proposals, proposalHash, proposal)
@@ -45,19 +49,29 @@ async function load () {
       }
     },
     actions: {
-      vote ({ state }, { proposal, support }) {
+      vote ({ commit, state }, { proposal, support }) {
         etherVote.vote(proposal, support, { from: state.account }, (err, result) => {
           if (err) return console.error(err)
-          console.log(result)
+          commit('updateTransaction', {
+            from: state.account,
+            tx: result,
+            type: 'vote',
+            status: 'pending'
+          })
         })
       },
-      propose ({ state }, { proposal, proposalHash }) {
+      propose ({ commit, state }, { proposal, proposalHash }) {
         etherVote.propose(proposal, proposalHash, { from: state.account }, (err, result) => {
           if (err) return console.error(err)
-          console.log(result)
+          commit('updateTransaction', {
+            from: state.account,
+            tx: result,
+            type: 'proposal',
+            status: 'pending'
+          })
         })
       },
-      watch: async ({ commit, state }) => {
+      start: async ({ commit, state }) => {
         try {
           etherVote = await loadEthervote()
         } catch (e) {
@@ -66,7 +80,7 @@ async function load () {
         }
 
         const logFilter = {
-          fromBlock: 0,
+          fromBlock: process.env.ETHERVOTE_BLOCK || 0,
           toBlock: 'latest'
         }
 
@@ -75,10 +89,18 @@ async function load () {
         logProposals.watch((err, event) => {
           if (err) return console.error(err)
 
-          const { proposal, proposalHash } = event.args
+          const { addr, proposal, proposalHash } = event.args
           commit('updateProposal', {
             proposal,
             proposalHash
+          })
+
+          const { transactionHash } = event
+          commit('updateTransaction', {
+            from: addr,
+            tx: transactionHash,
+            type: 'proposal',
+            status: 'confirmed'
           })
         })
 
@@ -94,6 +116,14 @@ async function load () {
             address: addr,
             proposalHash,
             support
+          })
+
+          const { transactionHash } = event
+          commit('updateTransaction', {
+            from: addr,
+            tx: transactionHash,
+            type: 'vote',
+            status: 'confirmed'
           })
         })
 

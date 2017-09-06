@@ -4,14 +4,13 @@
 
 const Vue = require('vue')
 const Vuex = require('vuex')
-const VueRouter = require('vue-router')
 const Web3 = require('web3')
 const loadStore = require('./store')
 const App = require('./components/app.vue')
 
 Vue.use(Vuex)
-Vue.use(VueRouter)
 Vue.component('proposal', require('./components/proposal.vue'))
+Vue.component('transactions', require('./components/transactions.vue'))
 Vue.component('web3', require('./components/web3.vue'))
 Vue.component('account', require('./components/account.vue'))
 
