@@ -1,16 +1,13 @@
 'use strict'
 
-/* global web3 */
-
 const Vue = require('vue')
 const Vuex = require('vuex')
-const loadEthervote = require('../contracts/ethervote')
+const etherVote = require('../contracts/ethervote')
+const { getAccounts, getBalance, watchBlocks } = require('../lib/ethereum')
 
 module.exports = load
 
 async function load () {
-  let etherVote
-
   const store = new Vuex.Store({
     state: {
       error: null,
@@ -49,67 +46,38 @@ async function load () {
       }
     },
     actions: {
-      vote ({ commit, state }, { proposal, support }) {
-        etherVote.vote(proposal, support, { from: state.account }, (err, result) => {
-          if (err) return console.error(err)
+      vote: async ({ commit, state }, { proposal, support }) => {
+        let result
+        try {
+          result = await etherVote.vote(proposal, support, state.account)
           commit('updateTransaction', {
             from: state.account,
             tx: result,
             type: 'vote',
             status: 'pending'
           })
-        })
+        } catch (e) {
+          console.error(e)
+        }
       },
-      propose ({ commit, state }, { proposal, proposalHash }) {
-        etherVote.propose(proposal, proposalHash, { from: state.account }, (err, result) => {
-          if (err) return console.error(err)
+      propose: async ({ commit, state }, { proposal, proposalHash }) => {
+        let result
+        try {
+          result = await etherVote.propose(proposal, proposalHash, state.account)
           commit('updateTransaction', {
             from: state.account,
             tx: result,
             type: 'proposal',
             status: 'pending'
           })
-        })
-      },
-      start: async ({ commit, state }) => {
-        try {
-          etherVote = await loadEthervote()
         } catch (e) {
-          commit('updateError', e.message)
-          return
+          console.error(e)
         }
-
-        const logFilter = {
-          fromBlock: process.env.ETHERVOTE_BLOCK || 0,
-          toBlock: 'latest'
-        }
-
-        // watch for proposals
-        const logProposals = etherVote.LogProposal({}, logFilter)
-        logProposals.watch((err, event) => {
-          if (err) return console.error(err)
-
-          const { addr, proposal, proposalHash } = event.args
-          commit('updateProposal', {
-            proposal,
-            proposalHash
-          })
-
-          const { transactionHash } = event
-          commit('updateTransaction', {
-            from: addr,
-            tx: transactionHash,
-            type: 'proposal',
-            status: 'confirmed'
-          })
-        })
-
+      },
+      watchVotes: async ({ commit, state }) => {
         // watch for votes
-        const logVotes = etherVote.LogVote({}, logFilter)
-
-        logVotes.watch((err, event) => {
-          if (err) return console.error(err)
-
+        const logVotes = await etherVote.logVote()
+        logVotes.on('vote', event => {
           const { proposalHash, addr, support } = event.args
 
           commit('updateVote', {
@@ -127,20 +95,84 @@ async function load () {
           })
         })
 
-        // watch for blocks
-        web3.eth.filter('latest').watch((err, result) => {
-          if (err) return console.error(err)
-
-          // update balance
-          web3.eth.getBalance(state.account, (err, balance) => {
-            if (err) return console.error(err)
-
-            balance = Number(web3.fromWei(balance, 'ether'))
-
-            commit('updateBalance', balance)
+        logVotes.on('error', err => {
+          console.error(err)
+        })
+      },
+      watchProposals: async ({ commit, state }) => {
+        // watch for proposals
+        const logProposals = await etherVote.logProposal()
+        logProposals.on('proposal', event => {
+          const { addr, proposal, proposalHash } = event.args
+          commit('updateProposal', {
+            proposal,
+            proposalHash
           })
 
-          // totalize votes
+          const { transactionHash } = event
+          commit('updateTransaction', {
+            from: addr,
+            tx: transactionHash,
+            type: 'proposal',
+            status: 'confirmed'
+          })
+        })
+
+        logProposals.on('error', err => {
+          console.error(err)
+        })
+      },
+      setAccount: async ({ commit }) => {
+        let accounts
+        try {
+          accounts = await getAccounts()
+        } catch (e) {
+          console.error(e)
+        }
+
+        if (!accounts || accounts.length === 0) {
+          commit('updateError', 'No ethereum account found, please create one.')
+          return
+        }
+
+        const account = accounts[0]
+        commit('updateAccount', account)
+      },
+      setBalance: async ({ commit, state }) => {
+        let balance
+        try {
+          balance = await getBalance(state.account)
+          commit('updateBalance', balance)
+        } catch (e) {
+          console.error(e)
+        }
+      },
+      start: async ({ dispatch, commit, state }) => {
+        try {
+          await etherVote.getContract()
+        } catch (e) {
+          commit('updateError', e.message)
+          return
+        }
+
+        await dispatch('setAccount')
+        await dispatch('setBalance')
+        await dispatch('watchProposals')
+        await dispatch('watchVotes')
+
+        // watch for blocks
+        const blocks = watchBlocks()
+        blocks.on('block', async (event) => {
+          // update balance
+          let balance
+          try {
+            balance = await getBalance(state.account)
+            commit('updateBalance', balance)
+          } catch (e) {
+            console.error(e)
+          }
+
+            // totalize votes
           Object.keys(state.votes).forEach(proposalHash => {
             const votes = state.votes[proposalHash]
             const addresses = Object.keys(votes)
@@ -160,6 +192,10 @@ async function load () {
 
             commit('updateTotal', { proposalHash, total })
           })
+        })
+
+        blocks.on('error', err => {
+          console.error(err)
         })
       }
     }
