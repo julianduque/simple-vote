@@ -147,6 +147,27 @@ async function load () {
           console.error(e)
         }
       },
+      totalizeVotes ({ commit, state }) {
+        Object.keys(state.votes).forEach(proposalHash => {
+          const votes = state.votes[proposalHash]
+          const addresses = Object.keys(votes)
+          const total = {
+            support: 0,
+            against: 0,
+            votes: addresses.length
+          }
+
+          addresses.forEach(address => {
+            if (votes[address]) {
+              total.support++
+            } else {
+              total.against++
+            }
+          })
+
+          commit('updateTotal', { proposalHash, total })
+        })
+      },
       start: async ({ dispatch, commit, state }) => {
         try {
           await etherVote.getContract()
@@ -159,6 +180,7 @@ async function load () {
         await dispatch('setBalance')
         await dispatch('watchProposals')
         await dispatch('watchVotes')
+        await dispatch('totalizeVotes')
 
         // watch for blocks
         const blocks = watchBlocks()
@@ -172,26 +194,7 @@ async function load () {
             console.error(e)
           }
 
-            // totalize votes
-          Object.keys(state.votes).forEach(proposalHash => {
-            const votes = state.votes[proposalHash]
-            const addresses = Object.keys(votes)
-            const total = {
-              support: 0,
-              against: 0,
-              votes: addresses.length
-            }
-
-            addresses.forEach(address => {
-              if (votes[address]) {
-                total.support++
-              } else {
-                total.against++
-              }
-            })
-
-            commit('updateTotal', { proposalHash, total })
-          })
+          await dispatch('totalizeVotes')
         })
 
         blocks.on('error', err => {

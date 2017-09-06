@@ -1124,11 +1124,36 @@ var load = function () {
                     return _ref18.apply(this, arguments);
                   };
                 }(),
+                totalizeVotes: function totalizeVotes(_ref20) {
+                  var commit = _ref20.commit,
+                      state = _ref20.state;
+
+                  (0, _keys2.default)(state.votes).forEach(function (proposalHash) {
+                    var votes = state.votes[proposalHash];
+                    var addresses = (0, _keys2.default)(votes);
+                    var total = {
+                      support: 0,
+                      against: 0,
+                      votes: addresses.length
+                    };
+
+                    addresses.forEach(function (address) {
+                      if (votes[address]) {
+                        total.support++;
+                      } else {
+                        total.against++;
+                      }
+                    });
+
+                    commit('updateTotal', { proposalHash: proposalHash, total: total });
+                  });
+                },
+
                 start: function () {
-                  var _ref20 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(_ref21) {
-                    var dispatch = _ref21.dispatch,
-                        commit = _ref21.commit,
-                        state = _ref21.state;
+                  var _ref21 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(_ref22) {
+                    var dispatch = _ref22.dispatch,
+                        commit = _ref22.commit,
+                        state = _ref22.state;
                     var blocks;
                     return _regenerator2.default.wrap(function _callee8$(_context8) {
                       while (1) {
@@ -1166,12 +1191,16 @@ var load = function () {
                             return dispatch('watchVotes');
 
                           case 17:
+                            _context8.next = 19;
+                            return dispatch('totalizeVotes');
+
+                          case 19:
 
                             // watch for blocks
                             blocks = watchBlocks();
 
                             blocks.on('block', function () {
-                              var _ref22 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(event) {
+                              var _ref23 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(event) {
                                 var balance;
                                 return _regenerator2.default.wrap(function _callee7$(_context7) {
                                   while (1) {
@@ -1197,29 +1226,10 @@ var load = function () {
                                         console.error(_context7.t0);
 
                                       case 11:
+                                        _context7.next = 13;
+                                        return dispatch('totalizeVotes');
 
-                                        // totalize votes
-                                        (0, _keys2.default)(state.votes).forEach(function (proposalHash) {
-                                          var votes = state.votes[proposalHash];
-                                          var addresses = (0, _keys2.default)(votes);
-                                          var total = {
-                                            support: 0,
-                                            against: 0,
-                                            votes: addresses.length
-                                          };
-
-                                          addresses.forEach(function (address) {
-                                            if (votes[address]) {
-                                              total.support++;
-                                            } else {
-                                              total.against++;
-                                            }
-                                          });
-
-                                          commit('updateTotal', { proposalHash: proposalHash, total: total });
-                                        });
-
-                                      case 12:
+                                      case 13:
                                       case 'end':
                                         return _context7.stop();
                                     }
@@ -1228,7 +1238,7 @@ var load = function () {
                               }));
 
                               return function (_x10) {
-                                return _ref22.apply(this, arguments);
+                                return _ref23.apply(this, arguments);
                               };
                             }());
 
@@ -1236,7 +1246,7 @@ var load = function () {
                               console.error(err);
                             });
 
-                          case 20:
+                          case 22:
                           case 'end':
                             return _context8.stop();
                         }
@@ -1245,7 +1255,7 @@ var load = function () {
                   }));
 
                   return function start(_x9) {
-                    return _ref20.apply(this, arguments);
+                    return _ref21.apply(this, arguments);
                   };
                 }()
               }
