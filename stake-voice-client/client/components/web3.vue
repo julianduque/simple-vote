@@ -8,24 +8,17 @@
 </template>
 
 <script>
+
 module.exports = {
   data () {
     return {
-      version: null
-    }
-  },
-  methods: {
-    updateNotice (notice) {
-      this.$store.commit('updateNotice', notice)
+      version: null,
     }
   },
   mounted () {
-    if (typeof web3 === 'undefined') {
-      this.updateNotice('No web3 instance found, please use a supported browser (MetaMask, Mist)')
-      return
+    if (typeof web3 !== 'undefined') {
+      this.version = web3.version.api
     }
-
-    this.version = web3.version.api
   }
 }
 </script>

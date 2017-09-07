@@ -37,7 +37,7 @@ function getBalance (addr, unit = 'ether') {
 
 async function loadContract (contract, addr) {
   if (typeof web3 === 'undefined') {
-    throw new Error('web3 instance not found')
+    throw new Error('No web3 instance found, please use a supported browser (MetaMask, Mist)')
   }
 
   const code = await getCode(addr)
