@@ -54,11 +54,6 @@ module.exports = {
       return this.$store.state.totals[this.hash] || { support: 0, votes: 0, against: 0 }
     }
   },
-  filters: {
-    zero (val) {
-      return val || 0
-    }
-  },
   methods: {
     support () {
       this.vote(true)
