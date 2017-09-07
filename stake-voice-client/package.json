@@ -6,8 +6,9 @@
   "license": "MIT",
   "scripts": {
     "lint": "standard",
-    "build-dev": "browserify -g envify -t babelify -t vueify client/app.js -o public/bundle.js",
-    "build": "NODE_ENV=production browserify -g envify -t babelify -t vueify client/app.js | uglifyjs -c -m -o public/bundle.js",
+    "copy-styles": "cp node_modules/vue-material/dist/vue-material.css public/vue-material.css",
+    "build-dev": "npm run copy-styles && browserify -g envify -t babelify -t vueify client/app.js -o public/bundle.js",
+    "build": "npm run copy-styles && NODE_ENV=production browserify -g envify -t babelify -t vueify client/app.js | uglifyjs -c -m -o public/bundle.js",
     "prestart": "npm run build",
     "start": "node server",
     "prestart-dev": "npm run build-dev",
@@ -27,6 +28,7 @@
   },
   "dependencies": {
     "vue": "^2.4.2",
+    "vue-material": "^0.7.4",
     "vuex": "^2.4.0",
     "web3": "^0.20.1"
   }

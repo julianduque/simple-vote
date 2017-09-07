@@ -3,7 +3,7 @@
 const EventEmitter = require('events')
 const { loadContract } = require('../lib/ethereum')
 const etherVote = require('./ethervote.json')
-const etherVoteAddr = process.env.ETHERVOTE_ADDRESS || '0x3eaf1834d6b686f2aef0b51de18e062715ea3c2b'
+const etherVoteAddr = process.env.ETHERVOTE_ADDRESS || '0xb209e64ca3ca397e02a237e07ce43cd3a2be02ec'
 
 const startBlock = process.env.ETHERVOTE_BLOCK || 0
 let contract

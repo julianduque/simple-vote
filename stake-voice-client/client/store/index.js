@@ -10,7 +10,7 @@ module.exports = load
 async function load () {
   const store = new Vuex.Store({
     state: {
-      error: null,
+      notice: null,
       account: null,
       balance: null,
       transactions: {},
@@ -19,8 +19,8 @@ async function load () {
       totals: {}
     },
     mutations: {
-      updateError (state, error) {
-        state.error = error
+      updateNotice (state, notice) {
+        state.notice = notice
       },
       updateAccount (state, account) {
         state.account = account
@@ -57,7 +57,7 @@ async function load () {
             status: 'pending'
           })
         } catch (e) {
-          console.error(e)
+          commit('updateNotice', e.message)
         }
       },
       propose: async ({ commit, state }, { proposal, proposalHash }) => {
@@ -71,7 +71,7 @@ async function load () {
             status: 'pending'
           })
         } catch (e) {
-          console.error(e)
+          commit('updateNotice', e.message)
         }
       },
       watchVotes: async ({ commit, state }) => {
@@ -96,7 +96,7 @@ async function load () {
         })
 
         logVotes.on('error', err => {
-          console.error(err)
+          commit('updateNotice', err.message)
         })
       },
       watchProposals: async ({ commit, state }) => {
@@ -119,7 +119,7 @@ async function load () {
         })
 
         logProposals.on('error', err => {
-          console.error(err)
+          commit('updateNotice', err.message)
         })
       },
       setAccount: async ({ commit }) => {
@@ -127,11 +127,11 @@ async function load () {
         try {
           accounts = await getAccounts()
         } catch (e) {
-          console.error(e)
+          commit('updateNotice', e.message)
         }
 
         if (!accounts || accounts.length === 0) {
-          commit('updateError', 'No ethereum account found, please create one.')
+          commit('updateNotice', 'No ethereum account found, please create one.')
           return
         }
 
@@ -144,7 +144,7 @@ async function load () {
           balance = await getBalance(state.account)
           commit('updateBalance', balance)
         } catch (e) {
-          console.error(e)
+          commit('updateNotice', e.message)
         }
       },
       totalizeVotes ({ commit, state }) {
@@ -172,7 +172,7 @@ async function load () {
         try {
           await etherVote.getContract()
         } catch (e) {
-          commit('updateError', e.message)
+          commit('updateNotice', e.message)
           return
         }
 
@@ -191,14 +191,14 @@ async function load () {
             balance = await getBalance(state.account)
             commit('updateBalance', balance)
           } catch (e) {
-            console.error(e)
+            commit('updateNotice', e.message)
           }
 
           await dispatch('totalizeVotes')
         })
 
         blocks.on('error', err => {
-          console.error(err)
+          commit('updateNotice', err.message)
         })
       }
     }

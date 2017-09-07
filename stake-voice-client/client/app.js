@@ -4,11 +4,13 @@
 
 const Vue = require('vue')
 const Vuex = require('vuex')
+const VueMaterial = require('vue-material')
 const Web3 = require('web3')
 const loadStore = require('./store')
 const App = require('./components/app.vue')
 
 Vue.use(Vuex)
+Vue.use(VueMaterial)
 Vue.component('proposal', require('./components/proposal.vue'))
 Vue.component('transactions', require('./components/transactions.vue'))
 Vue.component('web3', require('./components/web3.vue'))
