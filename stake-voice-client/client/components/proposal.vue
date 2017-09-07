@@ -1,3 +1,8 @@
+<style>
+  .md-row {
+    margin-bottom: 5px;
+  }
+</style>
 <template>
   <md-card md-with-hover>
     <md-card-area>

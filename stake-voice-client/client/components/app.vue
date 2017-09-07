@@ -12,7 +12,7 @@
         <md-layout md-flex="25">
           <web3></web3>
         </md-layout>
-        <md-layout>
+        <md-layout md-flex-offset="5">
           <account></account>
         </md-layout>
       </md-layout>

@@ -15,6 +15,12 @@ Vue.component('proposal', require('./components/proposal.vue'))
 Vue.component('transactions', require('./components/transactions.vue'))
 Vue.component('web3', require('./components/web3.vue'))
 Vue.component('account', require('./components/account.vue'))
+Vue.material.registerTheme('default', {
+  primary: 'blue-grey',
+  accent: 'red',
+  warn: 'orange',
+  background: 'white'
+})
 
 async function startApp () {
   // eslint-disable-next-line no-unused-vars
