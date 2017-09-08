@@ -4,6 +4,8 @@ A Voting DApp for the Ethereum Blockchain
 
 Based on the tutorial [How to build server less applications for Mist](https://blog.ethereum.org/2016/07/12/build-server-less-applications-mist/) by [Alex Van de Sande](https://blog.ethereum.org/author/avsa/)
 
+You can se a working demo [here](https://julianduque.github.io/stake-vote/)
+
 ## stake-voice-contract
 
 [Truffle][truffle] project with the `EtherVote` contract written in Solidity
