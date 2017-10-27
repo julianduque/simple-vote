@@ -4,15 +4,15 @@ contract EtherVote {
   event LogProposal (string proposal, bytes32 proposalHash, address addr);
   event LogVote (bytes32 proposalHash, bool support, address addr);
 
-  function propose (string proposal, bytes32 proposalHash) {
+  function propose (string proposal, bytes32 proposalHash) public {
     LogProposal(proposal, proposalHash, msg.sender);
   }
 
-  function vote (bytes32 proposalHash, bool support) {
+  function vote (bytes32 proposalHash, bool support) public {
     LogVote(proposalHash, support, msg.sender);
   }
 
-  function () {
+  function () public {
     revert();
   }
 }

@@ -1,7 +1,7 @@
 {
-  "name": "stake-voice-client",
+  "name": "simple-vote-client",
   "version": "1.0.0",
-  "description": "A simple Dapp",
+  "description": "A simple voting DApp",
   "author": "Julian Duque <julianduquej@gmail.com>",
   "license": "MIT",
   "scripts": {

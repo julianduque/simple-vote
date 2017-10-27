@@ -7,7 +7,7 @@
 <template>
   <div>
     <md-toolbar class="md-medium">
-      <h1 class="md-title" style="flex: 1">Stake Vote</h1>
+      <h1 class="md-title" style="flex: 1">Simple Vote</h1>
       <md-layout md-flex="40">
         <md-layout md-flex="25">
           <web3></web3>
