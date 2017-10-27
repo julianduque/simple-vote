@@ -21,7 +21,7 @@
     <div class="main-content">
       <md-layout md-column md-flex>
         <md-layout>
-          <md-layout v-for="(p, hash) in proposals" :key="hash" md-flex="33" v-row>
+          <md-layout v-for="(p, hash) in proposals" :key="hash" md-flex="33" md-row>
             <proposal :hash="hash" style="flex: 1; margin: 5px"></proposal>
           </md-layout>
         </md-layout>
